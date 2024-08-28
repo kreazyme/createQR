@@ -26,17 +26,14 @@ class ItemQRCode extends StatelessWidget {
             child: Container(
               padding: const EdgeInsets.all(32),
               margin: const EdgeInsets.all(52),
-              decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(12),
-                  color: Colors.white,
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.grey.withOpacity(0.5),
-                      spreadRadius: 8,
-                      blurRadius: 12,
-                      offset: const Offset(0, 3), // changes position of shadow
-                    ),
-                  ]),
+              decoration: BoxDecoration(borderRadius: BorderRadius.circular(12), color: Colors.white, boxShadow: [
+                BoxShadow(
+                  color: Colors.grey.withOpacity(0.5),
+                  spreadRadius: 8,
+                  blurRadius: 12,
+                  offset: const Offset(0, 3), // changes position of shadow
+                ),
+              ]),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
@@ -66,7 +63,7 @@ class ItemQRCode extends StatelessWidget {
                   Text(
                     "@Quick.QRBank",
                     style: TextStyle(
-                      fontSize: 24,
+                      fontSize: 22,
                       color: _selectedColor,
                       fontWeight: FontWeight.bold,
                     ),

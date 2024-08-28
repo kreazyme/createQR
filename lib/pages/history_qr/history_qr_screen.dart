@@ -12,12 +12,17 @@ class HistoryQrScreen extends StatefulWidget {
 }
 
 class _HistoryQrScreenState extends State<HistoryQrScreen> {
-  late final List<QrModel> _qrs;
+  List<QrModel> _qrs = [];
 
   @override
   void initState() {
-    _qrs = AppRepository.instance.getQrs();
+    _loadQrs();
     super.initState();
+  }
+
+  void _loadQrs() async {
+    _qrs = await AppRepository.instance.getQrs();
+    setState(() {});
   }
 
   @override

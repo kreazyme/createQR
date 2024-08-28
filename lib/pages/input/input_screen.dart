@@ -5,9 +5,9 @@ import 'package:banking/models/qr_model.dart';
 import 'package:banking/pages/history_qr/history_qr_screen.dart';
 import 'package:banking/pages/input/input_item_widget.dart';
 import 'package:banking/pages/show_qr/show_qr_screen.dart';
-import 'package:banking/services/local_storage_service.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:uuid/uuid.dart';
 
 class InputScreen extends StatefulWidget {
   const InputScreen({super.key});
@@ -73,12 +73,15 @@ class _InputScreenState extends State<InputScreen> {
       return;
     }
     if (_bankNumberController.text.isNotEmpty && _selectedIndex != -1) {
-      final qr = QrModel()
-        ..id = LocalStorageService.instance.db.qrModels.autoIncrement()
-        ..qrCode =
-            'https://img.vietqr.io/image/${_banks[_selectedIndex].shortName}-${_bankNumberController.text}-compact.png?amount=%3CAMOUNT%3E&addInfo=%3CDESCRIPTION%3E&accountName=%3CACCOUNT_NAME%3E'
-        ..bank = _banks[_selectedIndex]
-        ..bankNumber = _bankNumberController.text;
+      final qr = QrModel(
+        id: const Uuid().v4(),
+        qrCode:
+            'https://img.vietqr.io/image/${_banks[_selectedIndex].shortName}-${_bankNumberController.text}-compact.png?amount=%3CAMOUNT%3E&addInfo=%3CDESCRIPTION%3E&accountName=%3CACCOUNT_NAME%3E',
+        bank: _banks[_selectedIndex],
+        bankNumber: _bankNumberController.text,
+        colorIndex: 0,
+        createdAt: DateTime.now(),
+      );
       Navigator.push(
         cContext,
         MaterialPageRoute(

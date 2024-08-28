@@ -16,6 +16,7 @@ class ShowQRScreen extends StatefulWidget {
     super.key,
     this.isSaved = false,
   });
+
   final QrModel qr;
   final bool isSaved;
 
@@ -32,24 +33,27 @@ class _ShowQRScreenState extends State<ShowQRScreen> {
   List<Color> get colors => AppColors.colors;
   Color get _selectedColor => colors[_selectedColorIndex];
 
-  Future<void> _downloadVideo() async {
+  Future<void> _downloadQRImage() async {
     try {
-      Response response = await Dio().get(
+      final response = await Dio().get(
         widget.qr.qrCode,
         options: Options(
-            responseType: ResponseType.bytes,
-            followRedirects: false,
-            validateStatus: (status) {
-              return (status ?? 400) < 500;
-            }),
+          responseType: ResponseType.bytes,
+          followRedirects: false,
+          validateStatus: (status) => (status ?? 400) < 500,
+        ),
       );
-      var image = img.decodePng(response.data)!;
 
-      LuminanceSource source =
-          RGBLuminanceSource(image.width, image.height, image.convert(numChannels: 4).getBytes(order: img.ChannelOrder.abgr).buffer.asInt32List());
-      var bitmap = BinaryBitmap(GlobalHistogramBinarizer(source));
-      var reader = QRCodeReader();
-      var result = reader.decode(bitmap);
+      final image = img.decodePng(response.data)!;
+      final source = RGBLuminanceSource(
+        image.width,
+        image.height,
+        image.convert(numChannels: 4).getBytes(order: img.ChannelOrder.abgr).buffer.asInt32List(),
+      );
+      final bitmap = BinaryBitmap(GlobalHistogramBinarizer(source));
+      final reader = QRCodeReader();
+      final result = reader.decode(bitmap);
+
       setState(() {
         data = result.text;
         qrImage = response.data;
@@ -60,103 +64,108 @@ class _ShowQRScreenState extends State<ShowQRScreen> {
     }
   }
 
+  void _setSelectedColor() {
+    setState(() {
+      _selectedColorIndex = widget.qr.colorIndex;
+    });
+  }
+
   @override
   void initState() {
     super.initState();
-    _downloadVideo();
+    _downloadQRImage();
+    _setSelectedColor();
+  }
+
+  void _saveQr() async {
+    try {
+      widget.qr.colorIndex = _selectedColorIndex;
+      await AppRepository.instance.saveQr(widget.qr);
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          backgroundColor: Colors.green,
+          showCloseIcon: true,
+          content: Text('Đã lưu mã QR'),
+        ),
+      );
+    } catch (e) {
+      log(e.toString(), name: 'saveQr');
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          backgroundColor: Colors.red,
+          showCloseIcon: true,
+          content: Text('Lưu mã QR thất bại'),
+        ),
+      );
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     final qrSize = MediaQuery.of(context).size.width - 32 * 2 - 52 * 2;
+
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Mã QR của bạn"),
+        title: Text('${widget.qr.bank.code} - ${widget.qr.bankNumber}'),
         backgroundColor: Colors.white,
-        actions: !widget.isSaved
-            ? [
-                IconButton(
-                  onPressed: () {
-                    try {
-                      AppRepository.instance.saveQr(widget.qr);
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text('Đã lưu mã QR'),
+        actions: [
+          IconButton(
+            onPressed: _saveQr,
+            icon: const Icon(Icons.save_rounded),
+          ),
+        ],
+      ),
+      body: _isLoading
+          ? const Center(
+              child: CircularProgressIndicator(),
+            )
+          : Column(
+              children: [
+                ItemQRCode(
+                  qrSize: qrSize,
+                  data: data,
+                  selectedColor: _selectedColor,
+                ),
+                Container(
+                  padding: const EdgeInsets.only(
+                    left: 20,
+                    right: 20,
+                    bottom: 32,
+                    top: 12,
+                  ),
+                  height: 80,
+                  child: ListView.separated(
+                    scrollDirection: Axis.horizontal,
+                    itemCount: AppColors.colors.length,
+                    separatorBuilder: (context, index) => const SizedBox(width: 12),
+                    itemBuilder: (context, index) => GestureDetector(
+                      onTap: () {
+                        setState(() {
+                          _selectedColorIndex = index;
+                        });
+                      },
+                      child: AspectRatio(
+                        aspectRatio: 1,
+                        child: Container(
+                          height: 20,
+                          width: 20,
+                          decoration: BoxDecoration(
+                            color: AppColors.colors[index],
+                            borderRadius: BorderRadius.circular(32),
+                          ),
+                          alignment: Alignment.center,
+                          child: _selectedColorIndex == index ? const Icon(Icons.check, color: Colors.white, size: 20) : null,
                         ),
-                      );
-                    } catch (e) {
-                      log(e.toString(), name: 'Save QR');
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text('Lưu mã QR thất bại'),
-                        ),
-                      );
-                    }
-                  },
-                  icon: const Icon(
-                    Icons.save_rounded,
+                      ),
+                    ),
                   ),
                 ),
-              ]
-            : null,
-      ),
-      body: Container(
-        child: _isLoading
-            ? const Center(
-                child: CircularProgressIndicator(),
-              )
-            : Column(
-                children: [
-                  ItemQRCode(
-                    qrSize: qrSize,
-                    data: data,
-                    selectedColor: _selectedColor,
-                  ),
-                  Container(
-                    padding: const EdgeInsets.only(
-                      left: 20,
-                      right: 20,
-                      bottom: 32,
-                      top: 12,
-                    ),
-                    height: 80,
-                    child: ListView.separated(
-                      itemBuilder: (context, index) => GestureDetector(
-                        onTap: () {
-                          setState(() {
-                            _selectedColorIndex = index;
-                          });
-                        },
-                        child: AspectRatio(
-                          aspectRatio: 1,
-                          child: Container(
-                            height: 20,
-                            width: 20,
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(32),
-                              color: AppColors.colors[index],
-                            ),
-                            alignment: Alignment.center,
-                            child: _selectedColorIndex == index
-                                ? const Icon(
-                                    Icons.check,
-                                    color: Colors.white,
-                                    size: 20,
-                                  )
-                                : null,
-                          ),
-                        ),
-                      ),
-                      scrollDirection: Axis.horizontal,
-                      separatorBuilder: (context, index) => const SizedBox(
-                        width: 12,
-                      ),
-                      itemCount: AppColors.colors.length,
-                    ),
-                  )
-                ],
-              ),
-      ),
+              ],
+            ),
     );
   }
 }

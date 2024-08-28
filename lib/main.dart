@@ -1,7 +1,11 @@
 import 'package:banking/pages/input/input_screen.dart';
+import 'package:banking/repositories/app_repository.dart';
 import 'package:flutter/material.dart';
 
 void main() {
+  WidgetsFlutterBinding.ensureInitialized();
+  AppRepository.instance.initAppRepo();
+  
   runApp(const MyApp());
 }
 

@@ -1,19 +1,23 @@
+import 'dart:developer';
 import 'dart:typed_data';
 
 import 'package:banking/data/colors.dart';
+import 'package:banking/models/qr_model.dart';
 import 'package:banking/pages/show_qr/item_qr_code_widget.dart';
+import 'package:banking/repositories/app_repository.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
-import 'package:zxing2/qrcode.dart';
 import 'package:image/image.dart' as img;
+import 'package:zxing2/qrcode.dart';
 
 class ShowQRScreen extends StatefulWidget {
-  const ShowQRScreen({
+  const ShowQRScreen(
+    this.qr, {
     super.key,
-    required this.qrCode,
+    this.isSaved = false,
   });
-
-  final String qrCode;
+  final QrModel qr;
+  final bool isSaved;
 
   @override
   State<ShowQRScreen> createState() => _ShowQRScreenState();
@@ -31,7 +35,7 @@ class _ShowQRScreenState extends State<ShowQRScreen> {
   Future<void> _downloadVideo() async {
     try {
       Response response = await Dio().get(
-        widget.qrCode,
+        widget.qr.qrCode,
         options: Options(
             responseType: ResponseType.bytes,
             followRedirects: false,
@@ -41,14 +45,8 @@ class _ShowQRScreenState extends State<ShowQRScreen> {
       );
       var image = img.decodePng(response.data)!;
 
-      LuminanceSource source = RGBLuminanceSource(
-          image.width,
-          image.height,
-          image
-              .convert(numChannels: 4)
-              .getBytes(order: img.ChannelOrder.abgr)
-              .buffer
-              .asInt32List());
+      LuminanceSource source =
+          RGBLuminanceSource(image.width, image.height, image.convert(numChannels: 4).getBytes(order: img.ChannelOrder.abgr).buffer.asInt32List());
       var bitmap = BinaryBitmap(GlobalHistogramBinarizer(source));
       var reader = QRCodeReader();
       var result = reader.decode(bitmap);
@@ -58,7 +56,7 @@ class _ShowQRScreenState extends State<ShowQRScreen> {
         _isLoading = false;
       });
     } catch (e) {
-      print(e);
+      log(e.toString());
     }
   }
 
@@ -75,15 +73,32 @@ class _ShowQRScreenState extends State<ShowQRScreen> {
       appBar: AppBar(
         title: const Text("Mã QR của bạn"),
         backgroundColor: Colors.white,
-        // actions: [
-        //   IconButton(
-        //     onPressed: () {},
-        //     icon: const Icon(
-        //       Icons.save_outlined,
-        //       size: 24,
-        //     ),
-        //   )
-        // ],
+        actions: !widget.isSaved
+            ? [
+                IconButton(
+                  onPressed: () {
+                    try {
+                      AppRepository.instance.saveQr(widget.qr);
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('Đã lưu mã QR'),
+                        ),
+                      );
+                    } catch (e) {
+                      log(e.toString(), name: 'Save QR');
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('Lưu mã QR thất bại'),
+                        ),
+                      );
+                    }
+                  },
+                  icon: const Icon(
+                    Icons.save_rounded,
+                  ),
+                ),
+              ]
+            : null,
       ),
       body: Container(
         child: _isLoading

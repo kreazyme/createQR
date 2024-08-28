@@ -1,8 +1,11 @@
 import 'package:banking/data/contants.dart';
 import 'package:banking/extensions/string_extensions.dart';
-import 'package:banking/pages/input/input_item_widget.dart';
 import 'package:banking/models/bank_model.dart';
+import 'package:banking/models/qr_model.dart';
+import 'package:banking/pages/history_qr/history_qr_screen.dart';
+import 'package:banking/pages/input/input_item_widget.dart';
 import 'package:banking/pages/show_qr/show_qr_screen.dart';
+import 'package:banking/services/local_storage_service.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 
@@ -23,8 +26,7 @@ class _InputScreenState extends State<InputScreen> {
   String filter = '';
   String _bankNumber = '';
 
-  bool get _isValidateCreateCode =>
-      _selectedIndex != -1 && _bankNumber.isNotNullOrEmpty;
+  bool get _isValidateCreateCode => _selectedIndex != -1 && _bankNumber.isNotNullOrEmpty;
 
   @override
   void initState() {
@@ -45,14 +47,9 @@ class _InputScreenState extends State<InputScreen> {
         _banks = _allBanks
             .where(
               (bank) =>
-                  (bank.name?.toLowerCase().contains(filter.toLowerCase()) ??
-                      false) ||
-                  (bank.shortName
-                          ?.toLowerCase()
-                          .contains(filter.toLowerCase()) ??
-                      false) ||
-                  (bank.code?.toLowerCase().contains(filter.toLowerCase()) ??
-                      false),
+                  (bank.name?.toLowerCase().contains(filter.toLowerCase()) ?? false) ||
+                  (bank.shortName?.toLowerCase().contains(filter.toLowerCase()) ?? false) ||
+                  (bank.code?.toLowerCase().contains(filter.toLowerCase()) ?? false),
             )
             .toList();
       });
@@ -76,13 +73,16 @@ class _InputScreenState extends State<InputScreen> {
       return;
     }
     if (_bankNumberController.text.isNotEmpty && _selectedIndex != -1) {
+      final qr = QrModel()
+        ..id = LocalStorageService.instance.db.qrModels.autoIncrement()
+        ..qrCode =
+            'https://img.vietqr.io/image/${_banks[_selectedIndex].shortName}-${_bankNumberController.text}-compact.png?amount=%3CAMOUNT%3E&addInfo=%3CDESCRIPTION%3E&accountName=%3CACCOUNT_NAME%3E'
+        ..bank = _banks[_selectedIndex]
+        ..bankNumber = _bankNumberController.text;
       Navigator.push(
         cContext,
         MaterialPageRoute(
-          builder: (context) => ShowQRScreen(
-            qrCode:
-                'https://img.vietqr.io/image/${_banks[_selectedIndex].shortName}-${_bankNumberController.text}-compact.png?amount=%3CAMOUNT%3E&addInfo=%3CDESCRIPTION%3E&accountName=%3CACCOUNT_NAME%3E',
-          ),
+          builder: (context) => ShowQRScreen(qr),
         ),
       );
     }
@@ -96,22 +96,28 @@ class _InputScreenState extends State<InputScreen> {
         actions: [
           IconButton(
               onPressed: () {
-                showDialog(
-                  context: context,
-                  builder: (context) => AlertDialog(
-                    title: const Text('Chức năng đang phát triển'),
-                    content: const Text(
-                      'Chức năng lưu lại lịch sử tài khoản ngân hàng sẽ được phát triển trong thời gian tới do nhà phát triển chưa đủ kinh phí duy trì!',
-                    ),
-                    actions: [
-                      TextButton(
-                          onPressed: () {
-                            Navigator.pop(context);
-                          },
-                          child: const Text('Ok'))
-                    ],
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const HistoryQrScreen(),
                   ),
                 );
+                // showDialog(
+                //   context: context,
+                //   builder: (context) => AlertDialog(
+                //     title: const Text('Chức năng đang phát triển'),
+                //     content: const Text(
+                //       'Chức năng lưu lại lịch sử tài khoản ngân hàng sẽ được phát triển trong thời gian tới do nhà phát triển chưa đủ kinh phí duy trì!',
+                //     ),
+                //     actions: [
+                //       TextButton(
+                //           onPressed: () {
+                //             Navigator.pop(context);
+                //           },
+                //           child: const Text('Ok'))
+                //     ],
+                //   ),
+                // );
               },
               icon: const Icon(
                 Icons.history_outlined,
@@ -184,9 +190,7 @@ class _InputScreenState extends State<InputScreen> {
                         vertical: 16,
                       ),
                       decoration: BoxDecoration(
-                          color: _isValidateCreateCode
-                              ? Colors.deepPurple
-                              : Colors.grey,
+                          color: _isValidateCreateCode ? Colors.deepPurple : Colors.grey,
                           borderRadius: BorderRadius.circular(
                             12,
                           )),

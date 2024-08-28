@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 class InputItemWidget extends StatelessWidget {
   const InputItemWidget({
     super.key,
-    required this.isSelected,
+    this.isSelected = true,
     required this.bank,
     required this.onTap,
   });

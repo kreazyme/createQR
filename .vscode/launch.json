@@ -7,7 +7,9 @@
         {
             "name": "createQR",
             "request": "launch",
-            "type": "dart"
+            "type": "dart",
+            "deviceId": "chrome",
+            "args": ["--web-renderer", "html"]
         },
         {
             "name": "createQR (profile mode)",

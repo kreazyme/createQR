@@ -40,18 +40,19 @@ class BankModel {
   int? isTransfer;
   String? swiftCode;
 
-  BankModel(
-      {this.id,
-      this.name,
-      this.code,
-      this.bin,
-      this.shortName,
-      this.logo,
-      this.transferSupported,
-      this.lookupSupported,
-      this.support,
-      this.isTransfer,
-      this.swiftCode});
+  BankModel({
+    this.id,
+    this.name,
+    this.code,
+    this.bin,
+    this.shortName,
+    this.logo,
+    this.transferSupported,
+    this.lookupSupported,
+    this.support,
+    this.isTransfer,
+    this.swiftCode,
+  });
 
   BankModel.fromJson(Map<String, dynamic> json) {
     id = json['id'];
@@ -69,7 +70,7 @@ class BankModel {
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = Map<String, dynamic>();
+    final Map<String, dynamic> data = <String, dynamic>{};
     data['id'] = id;
     data['name'] = name;
     data['code'] = code;

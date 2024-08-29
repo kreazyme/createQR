@@ -1,7 +1,7 @@
 {
-    "name": "QuickQRBank",
-    "description": "Create Vietnam banking qr code from Banking name and Bank holder",
-    "version": "1.0.0",
+    "name": "Tạo QR Chuyển khoản nhanh",
+    "description": "Website mã QR Chuyển khoản nhanh chóng và dễ dàng",
+    "version": "1.2.0",
     "content_security_policy": {
         "extension_pages": "script-src 'self' ; object-src 'self'"
     },
@@ -9,5 +9,5 @@
         "default_popup": "index.html",
         "default_icon": "icons/Icon-192.png"
     },
-    "manifest_version": 3
+    "manifest_version": 4
 }

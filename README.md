@@ -1,21 +1,16 @@
-# banking
-
-A new Flutter project.
-
-## Getting Started
-
-This project is a starting point for a Flutter application.
-
-A few resources to get you started if this is your first Flutter project:
-
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+## Ứng dụng tạo và lưu mã QR chuyển khoản từ số tài khoản và tên ngân hàng
 
 ## Extension build command:
 ```bash
 flutter build web --web-renderer html --csp
 ```
+
+## Export package
+```
+cd build
+zip -r release.zip web
+```
+
+## Contributors
+- [anhquoc2010](https://github.com/anhquoc2010)
+- [spoon.dev](https://github.com/kreazyme)

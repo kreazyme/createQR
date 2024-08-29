@@ -48,7 +48,11 @@ class _ShowQRScreenState extends State<ShowQRScreen> {
       final source = RGBLuminanceSource(
         image.width,
         image.height,
-        image.convert(numChannels: 4).getBytes(order: img.ChannelOrder.abgr).buffer.asInt32List(),
+        image
+            .convert(numChannels: 4)
+            .getBytes(order: img.ChannelOrder.abgr)
+            .buffer
+            .asInt32List(),
       );
       final bitmap = BinaryBitmap(GlobalHistogramBinarizer(source));
       final reader = QRCodeReader();
@@ -113,10 +117,11 @@ class _ShowQRScreenState extends State<ShowQRScreen> {
         title: Text('${widget.qr.bank.code} - ${widget.qr.bankNumber}'),
         backgroundColor: Colors.white,
         actions: [
-          IconButton(
-            onPressed: _saveQr,
-            icon: const Icon(Icons.save_rounded),
-          ),
+          if (!widget.isSaved)
+            IconButton(
+              onPressed: _saveQr,
+              icon: const Icon(Icons.save_rounded),
+            ),
         ],
       ),
       body: _isLoading
@@ -141,7 +146,8 @@ class _ShowQRScreenState extends State<ShowQRScreen> {
                   child: ListView.separated(
                     scrollDirection: Axis.horizontal,
                     itemCount: AppColors.colors.length,
-                    separatorBuilder: (context, index) => const SizedBox(width: 12),
+                    separatorBuilder: (context, index) =>
+                        const SizedBox(width: 12),
                     itemBuilder: (context, index) => GestureDetector(
                       onTap: () {
                         setState(() {
@@ -158,7 +164,10 @@ class _ShowQRScreenState extends State<ShowQRScreen> {
                             borderRadius: BorderRadius.circular(32),
                           ),
                           alignment: Alignment.center,
-                          child: _selectedColorIndex == index ? const Icon(Icons.check, color: Colors.white, size: 20) : null,
+                          child: _selectedColorIndex == index
+                              ? const Icon(Icons.check,
+                                  color: Colors.white, size: 20)
+                              : null,
                         ),
                       ),
                     ),

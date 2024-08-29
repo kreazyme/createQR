@@ -26,7 +26,8 @@ class _InputScreenState extends State<InputScreen> {
   String filter = '';
   String _bankNumber = '';
 
-  bool get _isValidateCreateCode => _selectedIndex != -1 && _bankNumber.isNotNullOrEmpty;
+  bool get _isValidateCreateCode =>
+      _selectedIndex != -1 && _bankNumber.isNotNullOrEmpty;
 
   @override
   void initState() {
@@ -47,9 +48,18 @@ class _InputScreenState extends State<InputScreen> {
         _banks = _allBanks
             .where(
               (bank) =>
-                  (bank.name?.toLowerCase().contains(filter.toLowerCase()) ?? false) ||
-                  (bank.shortName?.toLowerCase().contains(filter.toLowerCase()) ?? false) ||
-                  (bank.code?.toLowerCase().contains(filter.toLowerCase()) ?? false),
+                  (bank.name?.toLowerCase().contains(
+                            filter.toLowerCase(),
+                          ) ??
+                      false) ||
+                  (bank.shortName?.toLowerCase().contains(
+                            filter.toLowerCase(),
+                          ) ??
+                      false) ||
+                  (bank.code?.toLowerCase().contains(
+                            filter.toLowerCase(),
+                          ) ??
+                      false),
             )
             .toList();
       });
@@ -193,7 +203,9 @@ class _InputScreenState extends State<InputScreen> {
                         vertical: 16,
                       ),
                       decoration: BoxDecoration(
-                          color: _isValidateCreateCode ? Colors.deepPurple : Colors.grey,
+                          color: _isValidateCreateCode
+                              ? Colors.deepPurple
+                              : Colors.grey,
                           borderRadius: BorderRadius.circular(
                             12,
                           )),
